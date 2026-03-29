@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Robots.txt Validator & Tester</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a73e8;--blue-l:#e8f0fe;--blue-d:#1557b0;
+  --green:#137333;--green-l:#e6f4ea;
+  --red:#c5221f;--red-l:#fce8e6;
+  --amber:#b06000;--amber-l:#fef7e0;
+  --t1:#202124;--t2:#5f6368;--t3:#9aa0a6;
+  --border:#e0e0e0;--border2:#dadce0;
+  --bg:#f8f9fa;--surf:#fff;--r:8px;
+}
+html{min-height:100%}
+body{min-height:100vh;background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+/* ── HEADER ── */
+#hdr{position:sticky;top:0;z-index:300;display:flex;align-items:center;gap:10px;padding:0 16px;height:56px;background:var(--surf);border-bottom:1px solid var(--border);box-shadow:0 1px 4px rgba(60,64,67,.15)}
+#hdr-logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
+#hdr-icon{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+#hdr-name{font-weight:700;font-size:15px;white-space:nowrap}
+#hdr-div{width:1px;height:20px;background:var(--border);margin:0 2px;flex-shrink:0}
+#hdr-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;flex:1;overflow:hidden}
+.chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:11px;font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.c-blue{background:var(--blue-l);color:var(--blue)}.c-green{background:var(--green-l);color:var(--green)}
+.c-red{background:var(--red-l);color:var(--red)}.c-amber{background:var(--amber-l);color:var(--amber)}
+.c-grey{background:#f1f3f4;color:var(--t2)}
+#hdr-right{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--t2);font-family:inherit;font-size:13px;font-weight:500;padding:5px 11px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
+.btn-ghost:hover{background:var(--bg);color:var(--t1)}
+.btn-primary{background:var(--blue);border:none;color:#fff;font-family:inherit;font-size:14px;font-weight:600;padding:10px 22px;border-radius:6px;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;min-width:120px}
+.btn-primary:hover{background:var(--blue-d)}
+.btn-primary:disabled{background:#a8c7fa;cursor:not-allowed}
+.btn-sm{font-size:12px;padding:4px 10px;border-radius:5px}
+/* ── MAIN ── */
+#main{max-width:960px;margin:0 auto;padding:20px 16px 80px}
+.card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.card-sub{font-size:13px;color:var(--t2);margin-bottom:18px}
+.field-label{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+/* ── URL ROW ── */
+.url-row{display:flex;gap:0;margin-bottom:4px}
+.url-input-wrap{flex:1;min-width:0}
+input.url-field{height:42px;padding:0 13px;border:1.5px solid var(--border2);border-radius:7px 0 0 7px;font-family:inherit;font-size:13px;color:var(--t1);outline:none;transition:border .15s;background:var(--surf);width:100%}
+input.url-field:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.1);z-index:1}
+input.url-field.url-err{border-color:var(--red);background:#fff8f7}
+input.url-field.url-ok{border-color:#34a853}
+.url-hint{font-size:11.5px;margin-top:5px;min-height:18px;line-height:1.4}
+.url-hint.err{color:var(--red)}.url-hint.ok{color:var(--green)}
+/* ── DROPDOWN ── */
+.dd-wrap{position:relative;flex-shrink:0}
+.dd-btn{height:42px;padding:0 12px;border:1.5px solid var(--border2);border-left:none;border-radius:0 7px 7px 0;background:var(--surf);font-family:inherit;font-size:13px;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:border .15s;width:230px}
+.dd-btn.open,.dd-btn:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,115,232,.1);outline:none;z-index:2;position:relative}
+.dd-btn-inner{display:flex;align-items:center;gap:6px;overflow:hidden;min-width:0;flex:1}
+.dd-btn-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.dd-placeholder{color:var(--t3)}
+.dd-arrow{flex-shrink:0;font-size:9px;color:var(--t3);transition:transform .2s}
+.dd-btn.open .dd-arrow{transform:rotate(180deg)}
+.dd-panel{position:absolute;top:calc(100% + 5px);right:0;width:320px;background:var(--surf);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 28px rgba(60,64,67,.2);z-index:600;display:none;overflow:hidden}
+.dd-panel.open{display:block}
+.dd-search-wrap{padding:10px 10px 8px;border-bottom:1px solid var(--border)}
+.dd-search{width:100%;height:34px;padding:0 10px;border:1px solid var(--border2);border-radius:6px;font-family:inherit;font-size:13px;outline:none;color:var(--t1)}
+.dd-search:focus{border-color:var(--blue)}
+.dd-list{max-height:280px;overflow-y:auto;padding:4px 0}
+.dd-cat{padding:8px 12px 3px;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;border-top:1px solid var(--border);margin-top:3px}
+.dd-cat:first-child{border-top:none;margin-top:0}
+.dd-opt{padding:8px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:background .1s}
+.dd-opt:hover{background:var(--blue-l)}.dd-opt.sel{background:var(--blue-l);color:var(--blue)}
+.dd-opt-ua{font-size:10.5px;color:var(--t3);font-family:'DM Mono',monospace;flex-shrink:0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-opt.sel .dd-opt-ua{color:var(--blue);opacity:.7}
+.dd-no-res{padding:14px 12px 8px;font-size:13px;color:var(--t3);text-align:center}
+/* "Continue with typed text" option */
+.dd-custom-opt{padding:9px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s;border-top:1px solid var(--border);color:var(--blue);font-weight:500}
+.dd-custom-opt:hover{background:var(--blue-l)}
+.dd-custom-icon{font-size:11px;background:var(--blue-l);color:var(--blue);padding:2px 6px;border-radius:4px;font-weight:700;flex-shrink:0}
+/* ── CONTROLS ROW ── */
+.controls-row{display:flex;align-items:flex-end;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
+.mode-group{display:flex;flex-direction:column;gap:6px}
+.mode-toggle{display:flex;border:1.5px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--bg)}
+.mode-lbl{display:flex;align-items:center;gap:6px;padding:8px 15px;cursor:pointer;font-size:13px;font-weight:500;color:var(--t2);transition:all .15s;user-select:none;white-space:nowrap;border-right:1px solid var(--border2)}
+.mode-lbl:last-child{border-right:none}
+.mode-lbl input{display:none}
+.mode-lbl.sel{background:var(--blue);color:#fff}
+.mode-lbl:not(.sel):hover{background:#eee;color:var(--t1)}
+/* ── FETCH MESSAGE ── */
+.fetch-msg{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-radius:7px;font-size:13px;line-height:1.6;margin-bottom:12px}
+.fetch-msg code{font-family:'DM Mono',monospace;font-size:11px;background:rgba(0,0,0,.07);padding:1px 5px;border-radius:3px}
+.fm-info{background:var(--blue-l);color:var(--blue)}.fm-ok{background:var(--green-l);color:var(--green)}
+.fm-warn{background:var(--amber-l);color:var(--amber)}.fm-err{background:var(--red-l);color:var(--red)}
+.fm-cache{background:#f3e8fd;color:#6200ee}
+.fm-icon{flex-shrink:0;font-size:14px;margin-top:1px}
+.spin{width:13px;height:13px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-top:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── EDITOR ── */
+#editor-section{display:none}
+.ed-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ed-title{font-size:15px;font-weight:700}
+.ed-domain{font-size:14px;font-weight:500;color:var(--t2)}
+.ed-wrap{border:1.5px solid var(--border2);border-radius:8px;overflow:hidden}
+.ed-toolbar{background:#f8f9fa;border-bottom:1px solid var(--border);padding:7px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ed-toolbar-info{font-size:12px;color:var(--t2);flex:1;min-width:0}
+.ed-container{position:relative;overflow:hidden}
+/* Highlight layer sits behind the textarea */
+#hl-layer{position:absolute;left:0;right:0;top:12px;pointer-events:none;z-index:1}
+.hl-line{height:20px}
+.hl-block{background:rgba(197,34,31,.13);border-left:3px solid #c5221f}
+.hl-allow{background:rgba(19,115,51,.13);border-left:3px solid #137333}
+.hl-ua   {background:rgba(26,115,232,.1); border-left:3px solid #1a73e8}
+.line-nums{position:absolute;left:0;top:0;bottom:0;width:44px;background:#f8f9fa;border-right:1px solid var(--border);padding:12px 0;font-family:'DM Mono',monospace;font-size:12px;color:var(--t3);text-align:right;overflow:hidden;user-select:none;pointer-events:none;line-height:20px;z-index:3}
+.ln-item{display:block;height:20px;padding-right:7px}
+#robots-ta{display:block;width:100%;min-height:200px;padding:12px 14px 12px 56px;border:none;outline:none;font-family:'DM Mono',monospace;font-size:12px;line-height:20px;color:var(--t1);background:transparent;resize:vertical;white-space:pre;overflow-wrap:normal;overflow-x:auto;position:relative;z-index:2;caret-color:var(--t1)}
+#robots-ta::placeholder{color:var(--t3);font-style:italic}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 14px;background:#f8f9fa;border-radius:0 0 7px 7px;border-top:1px solid var(--border);font-size:12px;color:var(--t2)}
+.lgd{display:flex;align-items:center;gap:5px}
+.lgd-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+/* ── RESULTS ── */
+#results-section{display:none}
+.result-hero{display:flex;align-items:flex-start;gap:16px;padding:18px 20px;border-radius:10px;margin-bottom:12px;border:2px solid}
+.rh-allowed{background:#e6f4ea;border-color:#34a853}
+.rh-blocked{background:var(--red-l);border-color:#e57368}
+.rh-icon{font-size:30px;flex-shrink:0;line-height:1}
+.rh-body{flex:1;min-width:0}
+.rh-verdict{font-size:17px;font-weight:700;margin-bottom:4px}
+.rh-allowed .rh-verdict{color:var(--green)}.rh-blocked .rh-verdict{color:var(--red)}
+.rh-desc{font-size:13px;color:var(--t1);line-height:1.7}
+.rh-desc strong{font-weight:600}
+.rh-path{font-family:'DM Mono',monospace;font-size:12px;background:rgba(0,0,0,.06);padding:2px 6px;border-radius:4px}
+.rules-hdr{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:8px}
+.rule-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:7px;font-size:13px;border:1px solid;margin-bottom:5px;flex-wrap:wrap}
+.rr-block{background:var(--red-l);border-color:#f28b82;color:var(--red)}
+.rr-allow{background:var(--green-l);border-color:#81c995;color:var(--green)}
+.rr-none{background:#f1f3f4;border-color:var(--border);color:var(--t2)}
+.rtag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:9px;color:#fff;flex-shrink:0}
+.rtag-d{background:var(--red)}.rtag-a{background:var(--green)}.rtag-n{background:var(--t3)}
+.rule-path-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex:1;min-width:0;overflow-wrap:break-word}
+.rule-line{font-size:11px;opacity:.7;white-space:nowrap;flex-shrink:0;margin-left:auto}
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);background:#202124;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ── MOBILE ── */
+@media(max-width:660px){
+  #hdr-meta{display:none}
+  .url-row{flex-direction:column}
+  input.url-field{border-radius:7px 7px 0 0;border-right:1.5px solid var(--border2)}
+  .dd-btn{width:100%;border-left:1.5px solid var(--border2);border-top:none;border-radius:0 0 7px 7px}
+  .dd-panel{width:100%;right:0;left:0}
+  .controls-row{flex-direction:column;align-items:stretch}
+  .mode-group{width:100%}
+  .mode-toggle{width:100%}
+  .mode-lbl{flex:1;justify-content:center}
+  .btn-primary{width:100%;justify-content:center}
+  .ed-toolbar{flex-wrap:wrap;gap:6px}
+  .rule-row{flex-wrap:wrap}
+  .rule-line{margin-left:0;width:100%}
+  #hdr-name{font-size:13px}
+  .btn-ghost span.hdr-doc-label{display:none}
+}
+@media(max-width:400px){
+  .card{padding:16px 14px}
+  .legend{gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div id="hdr-logo">
+    <div id="hdr-icon">🤖</div>
+    <span id="hdr-name">Robots.txt Validator</span>
+  </div>
+  <div id="hdr-div"></div>
+  <div id="hdr-meta">
+    <span class="chip c-grey" id="chip-domain" style="display:none"></span>
+    <span class="chip c-blue"  id="chip-bot"   style="display:none"></span>
+    <span class="chip c-grey"  id="chip-mode"  style="display:none"></span>
+  </div>
+  <div id="hdr-right">
+    <a href="https://developers.google.com/search/docs/crawling-indexing/robots/intro" target="_blank" class="btn-ghost"><span class="hdr-doc-label">📖 Docs</span></a>
+    <button class="btn-ghost" onclick="resetAll()">↺ Reset</button>
+  </div>
+</div>
+
+<div id="main">
+
+  <div class="card">
+    <div class="card-title">🔍 Test a URL Against robots.txt</div>
+    <div class="card-sub">Enter the full page URL to check, then choose a crawler and mode.</div>
+
+    <div class="field-label">URL to Test</div>
+    <div class="url-row">
+      <div class="url-input-wrap">
+        <input class="url-field" id="url-input" type="text"
+          placeholder="https://example.com/blog/post-title"
+          autocomplete="off" spellcheck="false"
+          oninput="onUrlInput()" onblur="validateUrl(true)"/>
+      </div>
+      <div class="dd-wrap" id="dd-wrap">
+        <button class="dd-btn" id="dd-btn" type="button" onclick="toggleDd()">
+          <div class="dd-btn-inner">
+            <span class="dd-btn-text dd-placeholder" id="dd-display">Select crawler…</span>
+          </div>
+          <span class="dd-arrow">▼</span>
+        </button>
+        <div class="dd-panel" id="dd-panel">
+          <div class="dd-search-wrap">
+            <input class="dd-search" id="dd-search" type="text"
+              placeholder="🔍  Search 500+ bots…" oninput="filterDd()"
+              maxlength="60" autocomplete="off" spellcheck="false"/>
+          </div>
+          <div class="dd-list" id="dd-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="url-hint" id="url-hint"></div>
+
+    <div class="controls-row">
+      <div class="mode-group">
+        <div class="field-label">Mode</div>
+        <div class="mode-toggle">
+          <label class="mode-lbl sel" id="lbl-live">
+            <input type="radio" name="mode" value="live" checked onchange="setMode('live')"/>
+            🌐 Live Fetch
+          </label>
+          <label class="mode-lbl" id="lbl-manual">
+            <input type="radio" name="mode" value="manual" onchange="setMode('manual')"/>
+            ✏️ Manual
+          </label>
+        </div>
+      </div>
+      <button class="btn-primary" id="test-btn" onclick="runTest()" disabled>
+        <span id="tbtn-icon">▶</span>
+        <span id="tbtn-txt">Test URL</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="editor-section">
+    <div class="card" style="padding:20px 22px">
+      <div class="ed-hdr">
+        <span class="ed-title">robots.txt</span>
+        <span class="ed-domain" id="ed-domain-label"></span>
+        <span class="chip" id="ed-status-chip" style="display:none;margin-left:auto"></span>
+      </div>
+      <div id="fetch-msg-area"></div>
+      <div class="ed-wrap">
+        <div class="ed-toolbar">
+          <span class="ed-toolbar-info" id="ed-info">Paste or fetch robots.txt content below</span>
+          <button class="btn-ghost btn-sm" onclick="clearEditor()">Clear</button>
+          <button class="btn-ghost btn-sm" onclick="copyEditor()">Copy</button>
+        </div>
+        <div class="ed-container">
+          <div id="hl-layer"></div>
+          <div class="line-nums" id="line-nums"><span class="ln-item">1</span></div>
+          <textarea id="robots-ta" spellcheck="false"
+            placeholder="# Example:&#10;User-agent: *&#10;Disallow: /admin/&#10;Allow: /public/&#10;Sitemap: https://example.com/sitemap.xml"
+            oninput="onEditorInput()"></textarea>
+        </div>
+        <div class="legend" id="ed-legend" style="display:none">
+          <span class="lgd"><span class="lgd-dot" style="background:rgba(26,115,232,.4);border:1.5px solid #1a73e8"></span>Matched User-agent group</span>
+          <span class="lgd"><span class="lgd-dot" style="background:rgba(197,34,31,.4);border:1.5px solid #c5221f"></span>Blocking rule</span>
+          <span class="lgd"><span class="lgd-dot" style="background:rgba(19,115,51,.4); border:1.5px solid #137333"></span>Allow rule</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="results-section">
+    <div class="card">
+      <div id="result-hero-box"></div>
+      <div id="rule-box"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  BOTS DATABASE  (name, user-agent token, category)
+//  Category is used to group items in the dropdown.
+// ═══════════════════════════════════════════════════════════
+var BOTS = [
+  // Google
+  {c:'Google',n:'Googlebot',ua:'Googlebot'},
+  {c:'Google',n:'Googlebot-Image',ua:'Googlebot-Image'},
+  {c:'Google',n:'Googlebot-Video',ua:'Googlebot-Video'},
+  {c:'Google',n:'Googlebot-News',ua:'Googlebot-News'},
+  {c:'Google',n:'Googlebot-Mobile',ua:'Googlebot-Mobile'},
+  {c:'Google',n:'Google-InspectionTool',ua:'Google-InspectionTool'},
+  {c:'Google',n:'Google-Extended (AI)',ua:'Google-Extended'},
+  {c:'Google',n:'AdsBot-Google',ua:'AdsBot-Google'},
+  {c:'Google',n:'AdsBot-Google-Mobile',ua:'AdsBot-Google-Mobile'},
+  {c:'Google',n:'APIs-Google',ua:'APIs-Google'},
+  {c:'Google',n:'Mediapartners-Google',ua:'Mediapartners-Google'},
+  {c:'Google',n:'GoogleOther',ua:'GoogleOther'},
+  {c:'Google',n:'Google-CloudVertex',ua:'Google-CloudVertex'},
+  {c:'Google',n:'Google-Read-Aloud',ua:'Google-Read-Aloud'},
+  {c:'Google',n:'Google-Safety',ua:'Google-Safety'},
+  {c:'Google',n:'Google-StoreBot',ua:'Google-StoreBot'},
+  {c:'Google',n:'GoogleAssociationService',ua:'GoogleAssociationService'},
+  {c:'Google',n:'HeadlessChrome (Google)',ua:'HeadlessChrome'},
+  // Microsoft / Bing
+  {c:'Microsoft / Bing',n:'Bingbot',ua:'bingbot'},
+  {c:'Microsoft / Bing',n:'BingPreview',ua:'BingPreview'},
+  {c:'Microsoft / Bing',n:'MicrosoftPreview',ua:'MicrosoftPreview'},
+  {c:'Microsoft / Bing',n:'adidxbot (Bing Ads)',ua:'adidxbot'},
+  // AI Crawlers
+  {c:'AI Crawlers',n:'GPTBot (OpenAI)',ua:'GPTBot'},
+  {c:'AI Crawlers',n:'ChatGPT-User (OpenAI)',ua:'ChatGPT-User'},
+  {c:'AI Crawlers',n:'OAI-SearchBot (OpenAI)',ua:'OAI-SearchBot'},
+  {c:'AI Crawlers',n:'ChatGPT Operator',ua:'ChatGPT'},
+  {c:'AI Crawlers',n:'ClaudeBot (Anthropic)',ua:'ClaudeBot'},
+  {c:'AI Crawlers',n:'Claude-Web (Anthropic)',ua:'Claude-Web'},
+  {c:'AI Crawlers',n:'anthropic-ai',ua:'anthropic-ai'},
+  {c:'AI Crawlers',n:'PerplexityBot',ua:'PerplexityBot'},
+  {c:'AI Crawlers',n:'Bytespider (TikTok/ByteDance)',ua:'Bytespider'},
+  {c:'AI Crawlers',n:'Meta-ExternalAgent',ua:'Meta-ExternalAgent'},
+  {c:'AI Crawlers',n:'Meta-ExternalFetcher',ua:'Meta-ExternalFetcher'},
+  {c:'AI Crawlers',n:'DuckAssistBot (DuckDuckGo)',ua:'DuckAssistBot'},
+  {c:'AI Crawlers',n:'Cohere AI',ua:'cohere-ai'},
+  {c:'AI Crawlers',n:'Cohere Training Crawler',ua:'cohere-training-data-crawler'},
+  {c:'AI Crawlers',n:'Diffbot',ua:'Diffbot'},
+  {c:'AI Crawlers',n:'YouBot',ua:'YouBot'},
+  {c:'AI Crawlers',n:'ChatGLM Spider (Zhipu)',ua:'ChatGLM-Spider'},
+  {c:'AI Crawlers',n:'Mistral AI',ua:'Mistral'},
+  {c:'AI Crawlers',n:'AI2Bot (Allen Institute)',ua:'AI2Bot'},
+  {c:'AI Crawlers',n:'img2dataset',ua:'img2dataset'},
+  {c:'AI Crawlers',n:'Amazon Kendra',ua:'Amazon-Kendra'},
+  {c:'AI Crawlers',n:'Echobox AI',ua:'Echobox'},
+  {c:'AI Crawlers',n:'Factset Spyder',ua:'Factset_spyder'},
+  {c:'AI Crawlers',n:'LinerBot',ua:'LinerBot'},
+  {c:'AI Crawlers',n:'Novellum AI',ua:'Novellum'},
+  {c:'AI Crawlers',n:'owlin bot',ua:'owlin'},
+  {c:'AI Crawlers',n:'sider.ai bot',ua:'sider.ai'},
+  {c:'AI Crawlers',n:'WRTNBot (Wrtn Technologies)',ua:'WRTNBot'},
+  // SEO Tools
+  {c:'SEO Tools',n:'SemrushBot',ua:'SemrushBot'},
+  {c:'SEO Tools',n:'SemrushBot-BA',ua:'SemrushBot-BA'},
+  {c:'SEO Tools',n:'SemrushBot-CT',ua:'SemrushBot-CT'},
+  {c:'SEO Tools',n:'SemrushBot-SI',ua:'SemrushBot-SI'},
+  {c:'SEO Tools',n:'SemrushBot-SWA',ua:'SemrushBot-SWA'},
+  {c:'SEO Tools',n:'AhrefsBot',ua:'AhrefsBot'},
+  {c:'SEO Tools',n:'AhrefsSiteAudit',ua:'AhrefsSiteAudit'},
+  {c:'SEO Tools',n:'MJ12bot (Majestic)',ua:'MJ12bot'},
+  {c:'SEO Tools',n:'DotBot (Moz)',ua:'DotBot'},
+  {c:'SEO Tools',n:'rogerbot (Moz)',ua:'rogerbot'},
+  {c:'SEO Tools',n:'BLEXBot (SEO PowerSuite)',ua:'BLEXBot'},
+  {c:'SEO Tools',n:'Screaming Frog SEO Spider',ua:'Screaming Frog SEO Spider'},
+  {c:'SEO Tools',n:'DataForSeoBot',ua:'DataForSeoBot'},
+  {c:'SEO Tools',n:'SEOkicks-Robot',ua:'SEOkicks-Robot'},
+  {c:'SEO Tools',n:'SeobilityBot',ua:'SeobilityBot'},
+  {c:'SEO Tools',n:'SiteAuditBot',ua:'SiteAuditBot'},
+  {c:'SEO Tools',n:'SiteCheckerBot',ua:'SiteCheckerBot'},
+  {c:'SEO Tools',n:'BrightEdge Crawler',ua:'BrightEdge'},
+  {c:'SEO Tools',n:'Botify',ua:'botify'},
+  {c:'SEO Tools',n:'Netpeak Bot',ua:'NetpeakBot'},
+  {c:'SEO Tools',n:'Ryte Bot',ua:'RyteBot'},
+  {c:'SEO Tools',n:'SISTRIX Optimizer',ua:'SISTRIX'},
+  {c:'SEO Tools',n:'serpstatbot',ua:'serpstatbot'},
+  {c:'SEO Tools',n:'GTmetrix',ua:'GTmetrix'},
+  {c:'SEO Tools',n:'Pandalytics',ua:'Pandalytics'},
+  {c:'SEO Tools',n:'MarketingMiner Bot',ua:'MarketingMiner'},
+  {c:'SEO Tools',n:'Wappalyzer',ua:'Wappalyzer'},
+  {c:'SEO Tools',n:'StractBot',ua:'StractBot'},
+  {c:'SEO Tools',n:'ContentKing',ua:'ContentKing'},
+  {c:'SEO Tools',n:'Audisto Crawler',ua:'Audisto'},
+  {c:'SEO Tools',n:'Deepcrawl',ua:'deepcrawl'},
+  {c:'SEO Tools',n:'Prerender',ua:'Prerender'},
+  {c:'SEO Tools',n:'aiHitBot',ua:'aiHitBot'},
+  {c:'SEO Tools',n:'BuiltWith Crawler',ua:'BuiltWith'},
+  {c:'SEO Tools',n:'HypeStat',ua:'HypeStat'},
+  {c:'SEO Tools',n:'Chrome-Lighthouse (Google)',ua:'Chrome-Lighthouse'},
+  {c:'SEO Tools',n:'Adagio Digital',ua:'Adagio'},
+  {c:'SEO Tools',n:'Bad-Neighborhood',ua:'Bad-Neighborhood'},
+  {c:'SEO Tools',n:'Barkrowler (Babbar)',ua:'Barkrowler'},
+  {c:'SEO Tools',n:'seoClarity bot',ua:'seoClarity'},
+  {c:'SEO Tools',n:'SERPtimizerBot',ua:'SERPtimizerBot'},
+  {c:'SEO Tools',n:'Schema-Markup-Validator',ua:'Schema-Markup-Validator'},
+  {c:'SEO Tools',n:'Clearscope / ClearscopeBot',ua:'ClearscopeBot'},
+  {c:'SEO Tools',n:'SiteScoreBot',ua:'SiteScoreBot'},
+  {c:'SEO Tools',n:'Caliber',ua:'Caliber'},
+  {c:'SEO Tools',n:'linkdexbot',ua:'linkdexbot'},
+  {c:'SEO Tools',n:'SenutoBot',ua:'SenutoBot'},
+  {c:'SEO Tools',n:'online-webceo-bot',ua:'online-webceo-bot'},
+  {c:'SEO Tools',n:'Hypefactors Crawler',ua:'Hypefactors'},
+  {c:'SEO Tools',n:'BigUpData',ua:'BigUpData'},
+  {c:'SEO Tools',n:'Awario Crawler',ua:'Awario'},
+  {c:'SEO Tools',n:'WMF Zotero Translation Server',ua:'WMF-Zotero'},
+  // Search Engines
+  {c:'Search Engines',n:'DuckDuckBot',ua:'DuckDuckBot'},
+  {c:'Search Engines',n:'DuckDuckGo-Favicons-Bot',ua:'DuckDuckGo-Favicons-Bot'},
+  {c:'Search Engines',n:'Slurp (Yahoo)',ua:'Slurp'},
+  {c:'Search Engines',n:'Yahoo! Slurp',ua:'Yahoo! Slurp'},
+  {c:'Search Engines',n:'Baiduspider',ua:'Baiduspider'},
+  {c:'Search Engines',n:'YandexBot',ua:'YandexBot'},
+  {c:'Search Engines',n:'YandexImages',ua:'YandexImages'},
+  {c:'Search Engines',n:'Yandex.Metrica',ua:'Yandex.Metrica'},
+  {c:'Search Engines',n:'Sogou Spider',ua:'Sogou'},
+  {c:'Search Engines',n:'Sogou (sogou spider)',ua:'sogou spider'},
+  {c:'Search Engines',n:'Exabot (Dassault)',ua:'Exabot'},
+  {c:'Search Engines',n:'Naver Yeti',ua:'Yeti'},
+  {c:'Search Engines',n:'NaverBot',ua:'NaverBot'},
+  {c:'Search Engines',n:'PetalBot (Huawei)',ua:'PetalBot'},
+  {c:'Search Engines',n:'Qwantify',ua:'Qwantify'},
+  {c:'Search Engines',n:'SeznamBot',ua:'SeznamBot'},
+  {c:'Search Engines',n:'Mail.RU Bot (VK)',ua:'Mail.RU_Bot'},
+  {c:'Search Engines',n:'Applebot',ua:'Applebot'},
+  {c:'Search Engines',n:'Applebot-Extended',ua:'Applebot-Extended'},
+  {c:'Search Engines',n:'MojeekBot',ua:'MojeekBot'},
+  {c:'Search Engines',n:'Daumoa (Kakao)',ua:'Daumoa'},
+  {c:'Search Engines',n:'iaskspider (SINA)',ua:'iaskspider'},
+  {c:'Search Engines',n:'Bytespider',ua:'Bytespider'},
+  {c:'Search Engines',n:'360Spider (Qihoo)',ua:'360Spider'},
+  {c:'Search Engines',n:'Cốc Cốc (coccocbot)',ua:'coccocbot'},
+  {c:'Search Engines',n:'coccocbot-web',ua:'coccocbot-web'},
+  {c:'Search Engines',n:'Seekport Crawler',ua:'Seekport'},
+  {c:'Search Engines',n:'SeekportBot',ua:'SeekportBot'},
+  {c:'Search Engines',n:'DeepSeekBot',ua:'DeepSeekBot'},
+  {c:'Search Engines',n:'ia_archiver (Wayback Machine)',ua:'ia_archiver'},
+  {c:'Search Engines',n:'CCBot (Common Crawl)',ua:'CCBot'},
+  {c:'Search Engines',n:'YisouSpider (SM.CN)',ua:'YisouSpider'},
+  {c:'Search Engines',n:'Brave Search',ua:'Brave'},
+  {c:'Search Engines',n:'Freespoke',ua:'Freespoke'},
+  {c:'Search Engines',n:'Kagi',ua:'Kagi'},
+  {c:'Search Engines',n:'Marginalia Search',ua:'Marginalia'},
+  {c:'Search Engines',n:'Linespider (LINE)',ua:'Linespider'},
+  {c:'Search Engines',n:'Swisscows Crawler',ua:'Swisscows'},
+  {c:'Search Engines',n:'OpenindexSpider',ua:'OpenindexSpider'},
+  {c:'Search Engines',n:'Startpage bot',ua:'startpage'},
+  {c:'Search Engines',n:'yacybot',ua:'yacybot'},
+  {c:'Search Engines',n:'Nutch (Apache)',ua:'Nutch'},
+  {c:'Search Engines',n:'FAST-WebCrawler',ua:'FAST-WebCrawler'},
+  // Social Media
+  {c:'Social Media',n:'Facebookbot / facebookexternalhit',ua:'facebookexternalhit'},
+  {c:'Social Media',n:'Twitterbot (X)',ua:'Twitterbot'},
+  {c:'Social Media',n:'LinkedInBot',ua:'LinkedInBot'},
+  {c:'Social Media',n:'Slackbot',ua:'Slackbot'},
+  {c:'Social Media',n:'Slackbot-LinkExpanding',ua:'Slackbot-LinkExpanding'},
+  {c:'Social Media',n:'TelegramBot',ua:'TelegramBot'},
+  {c:'Social Media',n:'Pinterest Bot',ua:'Pinterest'},
+  {c:'Social Media',n:'Pinterestbot',ua:'Pinterestbot'},
+  {c:'Social Media',n:'Discordbot',ua:'Discordbot'},
+  {c:'Social Media',n:'WhatsApp',ua:'WhatsApp'},
+  {c:'Social Media',n:'SkypeUriPreview',ua:'SkypeUriPreview'},
+  {c:'Social Media',n:'Snap URL Preview Service',ua:'Snap URL Preview Service'},
+  {c:'Social Media',n:'Snapbot',ua:'Snapbot'},
+  {c:'Social Media',n:'redditbot',ua:'redditbot'},
+  {c:'Social Media',n:'Bluesky Link Preview',ua:'Bluesky'},
+  {c:'Social Media',n:'Mastodon',ua:'Mastodon'},
+  {c:'Social Media',n:'Viber',ua:'Viber'},
+  {c:'Social Media',n:'vkShare (VK)',ua:'vkShare'},
+  {c:'Social Media',n:'OdklBot (VK)',ua:'OdklBot'},
+  {c:'Social Media',n:'kakao crawler',ua:'Kakaotalk'},
+  {c:'Social Media',n:'ByteDance crawler',ua:'ByteDance'},
+  {c:'Social Media',n:'Trendiction / Talkwalker',ua:'trendictionbot'},
+  {c:'Social Media',n:'Bing Preview',ua:'BingPreview'},
+  {c:'Social Media',n:'Tumblr bot',ua:'Tumblr'},
+  {c:'Social Media',n:'SummalyBot',ua:'SummalyBot'},
+  {c:'Social Media',n:'FlipboardBot',ua:'FlipboardBot'},
+  {c:'Social Media',n:'AwarioBot',ua:'AwarioBot'},
+  {c:'Social Media',n:'AwarioSmartBot',ua:'AwarioSmartBot'},
+  {c:'Social Media',n:'Fedica',ua:'Fedica'},
+  {c:'Social Media',n:'Steam Chat (Valve)',ua:'Valve Steam'},
+  // Monitoring & Uptime
+  {c:'Monitoring',n:'Pingdom',ua:'Pingdom.com_bot'},
+  {c:'Monitoring',n:'UptimeRobot',ua:'UptimeRobot'},
+  {c:'Monitoring',n:'Better Uptime',ua:'BetterUptime'},
+  {c:'Monitoring',n:'Site24x7',ua:'Site24x7'},
+  {c:'Monitoring',n:'StatusCake',ua:'StatusCake'},
+  {c:'Monitoring',n:'NodePing',ua:'NodePing'},
+  {c:'Monitoring',n:'Uptime-Kuma',ua:'Uptime-Kuma'},
+  {c:'Monitoring',n:'HetrixTools',ua:'HetrixTools'},
+  {c:'Monitoring',n:'OnlineOrNot',ua:'OnlineOrNot'},
+  {c:'Monitoring',n:'Checkly',ua:'Checkly'},
+  {c:'Monitoring',n:'Freshping (Freshworks)',ua:'Freshping'},
+  {c:'Monitoring',n:'360Monitoring',ua:'360Monitoring'},
+  {c:'Monitoring',n:'Catchpoint Bot',ua:'Catchpoint'},
+  {c:'Monitoring',n:'AlertSite (SmartBear)',ua:'AlertSite'},
+  {c:'Monitoring',n:'DowntimeDetector',ua:'DowntimeDetector'},
+  {c:'Monitoring',n:'downnotifier.com',ua:'downnotifier'},
+  {c:'Monitoring',n:'WatchMouse (Broadcom)',ua:'WatchMouse'},
+  {c:'Monitoring',n:'Wormly',ua:'Wormly'},
+  {c:'Monitoring',n:'Uptrends',ua:'Uptrends'},
+  {c:'Monitoring',n:'PingAdmin.Ru',ua:'PingAdmin'},
+  {c:'Monitoring',n:'PagePeeker',ua:'PagePeeker'},
+  {c:'Monitoring',n:'Check-Host',ua:'Check-Host'},
+  {c:'Monitoring',n:'Testomato bot',ua:'Testomato'},
+  {c:'Monitoring',n:'GotSiteMonitor',ua:'GotSiteMonitor'},
+  {c:'Monitoring',n:'BlogVault',ua:'BlogVault'},
+  {c:'Monitoring',n:'Prometheus bot',ua:'Prometheus'},
+  {c:'Monitoring',n:'Grafana Synthetic Monitoring',ua:'Grafana'},
+  {c:'Monitoring',n:'New Relic',ua:'NewRelic'},
+  {c:'Monitoring',n:'SolarWinds Observability',ua:'SolarWinds'},
+  {c:'Monitoring',n:'elmah.io Uptime',ua:'elmah.io'},
+  {c:'Monitoring',n:'HostTracker',ua:'HostTracker'},
+  {c:'Monitoring',n:'BinaryCanary',ua:'BinaryCanary'},
+  {c:'Monitoring',n:'internetVista monitor',ua:'internetVista'},
+  {c:'Monitoring',n:'updown.io bot',ua:'updown.io'},
+  {c:'Monitoring',n:'Uptimia',ua:'Uptimia'},
+  {c:'Monitoring',n:'statuscake bot',ua:'statuscake'},
+  {c:'Monitoring',n:'MxToolbox',ua:'MxToolbox'},
+  {c:'Monitoring',n:'monitoring360bot',ua:'monitoring360bot'},
+  {c:'Monitoring',n:'screeenly-bot',ua:'screeenly-bot'},
+  {c:'Monitoring',n:'Sentry Uptime Monitoring',ua:'Sentry'},
+  {c:'Monitoring',n:'PingPing',ua:'PingPing'},
+  {c:'Monitoring',n:'Spectate',ua:'Spectate'},
+  {c:'Monitoring',n:'Urlcheckr',ua:'Urlcheckr'},
+  {c:'Monitoring',n:'Oh Dear',ua:'Oh Dear'},
+  {c:'Monitoring',n:'Panopta (Fortinet)',ua:'Panopta'},
+  {c:'Monitoring',n:'Netumo',ua:'Netumo'},
+  {c:'Monitoring',n:'WPMUDEV Uptime Monitor',ua:'WPMUDEV'},
+  {c:'Monitoring',n:'IsDown',ua:'IsDown'},
+  {c:'Monitoring',n:'Mavifinds',ua:'Mavifinds'},
+  {c:'Monitoring',n:'EvoUptime',ua:'EvoUptime'},
+  // Security & Scanners
+  {c:'Security',n:'Qualys',ua:'Qualys'},
+  {c:'Security',n:'WPScan (Automattic)',ua:'WPScan'},
+  {c:'Security',n:'SSL Labs (Qualys)',ua:'SSL Labs'},
+  {c:'Security',n:'SecurityHeaders',ua:'SecurityHeaders'},
+  {c:'Security',n:'LeakIX bot',ua:'LeakIX'},
+  {c:'Security',n:'censys.io crawler',ua:'censys'},
+  {c:'Security',n:'Netcraft crawler',ua:'Netcraft'},
+  {c:'Security',n:'NetcraftSurveyAgent',ua:'NetcraftSurveyAgent'},
+  {c:'Security',n:'OpenVAS (Greenbone)',ua:'OpenVAS'},
+  {c:'Security',n:'Tenable crawler',ua:'Tenable'},
+  {c:'Security',n:'Detectify',ua:'Detectify'},
+  {c:'Security',n:'Expanse (Palo Alto)',ua:'Expanse'},
+  {c:'Security',n:'virustotal (Chronicle)',ua:'virustotal'},
+  {c:'Security',n:'masscan',ua:'masscan'},
+  {c:'Security',n:'WhatWeb',ua:'WhatWeb'},
+  {c:'Security',n:'unmask parasites',ua:'unmask parasites'},
+  {c:'Security',n:'CERT Polska crawler',ua:'CERT Polska'},
+  {c:'Security',n:'Ns.Tools Bot',ua:'Ns.Tools'},
+  {c:'Security',n:'intelx.io bot',ua:'intelx.io_bot'},
+  {c:'Security',n:'Foregenix crawler',ua:'Foregenix'},
+  {c:'Security',n:'Black Duck Fast Dynamic',ua:'Black Duck'},
+  {c:'Security',n:'Blockaid',ua:'Blockaid'},
+  {c:'Security',n:'Drata Autopilot',ua:'Drata'},
+  {c:'Security',n:'Riddlerbot (F-Secure)',ua:'Riddlerbot'},
+  {c:'Security',n:'BrandProtect bot',ua:'BrandProtect'},
+  {c:'Security',n:'Sansec Security Monitor',ua:'Sansec'},
+  {c:'Security',n:'Project Honeypot',ua:'Project Honeypot'},
+  {c:'Security',n:'WPSec',ua:'WPSec'},
+  {c:'Security',n:'Splunk Attack Analyzer',ua:'Splunk'},
+  {c:'Security',n:'BitSightBot',ua:'BitSightBot'},
+  {c:'Security',n:'ISSCyberRiskCrawler',ua:'ISSCyberRiskCrawler'},
+  {c:'Security',n:'CSIRT.CZ crawler',ua:'CSIRT.CZ'},
+  {c:'Security',n:'EdgeWatch',ua:'EdgeWatch'},
+  // Content & RSS
+  {c:'Content & RSS',n:'Feedly',ua:'Feedly'},
+  {c:'Content & RSS',n:'FeedBurner (Google)',ua:'FeedBurner'},
+  {c:'Content & RSS',n:'Feedspot',ua:'Feedspotbot'},
+  {c:'Content & RSS',n:'Feedbin',ua:'Feedbin'},
+  {c:'Content & RSS',n:'FreshRSS',ua:'FreshRSS'},
+  {c:'Content & RSS',n:'Inoreader',ua:'inoreader'},
+  {c:'Content & RSS',n:'NewsBlur',ua:'NewsBlur'},
+  {c:'Content & RSS',n:'CommaFeed',ua:'CommaFeed'},
+  {c:'Content & RSS',n:'Miniflux',ua:'Miniflux'},
+  {c:'Content & RSS',n:'Tiny Tiny RSS',ua:'Tiny Tiny RSS'},
+  {c:'Content & RSS',n:'theoldreader.com',ua:'theoldreader'},
+  {c:'Content & RSS',n:'Blogtrottr',ua:'Blogtrottr'},
+  {c:'Content & RSS',n:'Superfeedr (Medium)',ua:'Superfeedr'},
+  {c:'Content & RSS',n:'BublupBot',ua:'BublupBot'},
+  {c:'Content & RSS',n:'Buttondown RSS',ua:'Buttondown'},
+  {c:'Content & RSS',n:'Protopage',ua:'Protopage'},
+  {c:'Content & RSS',n:'RSSMicro',ua:'RSSMicro'},
+  {c:'Content & RSS',n:'FlipboardProxy',ua:'FlipboardProxy'},
+  {c:'Content & RSS',n:'FlipboardRSS',ua:'FlipboardRSS'},
+  {c:'Content & RSS',n:'Hatena',ua:'Hatena'},
+  {c:'Content & RSS',n:'HTTrack',ua:'HTTrack'},
+  {c:'Content & RSS',n:'Iframely',ua:'Iframely'},
+  {c:'Content & RSS',n:'Embedly',ua:'Embedly'},
+  {c:'Content & RSS',n:'SimplePie',ua:'SimplePie'},
+  {c:'Content & RSS',n:'Mediatoolkitbot',ua:'Mediatoolkitbot'},
+  {c:'Content & RSS',n:'MuckRack',ua:'MuckRack'},
+  {c:'Content & RSS',n:'Pocket bot',ua:'Pocket'},
+  {c:'Content & RSS',n:'scoop.it',ua:'scoop.it'},
+  {c:'Content & RSS',n:'NetShelter ContentScan',ua:'NetShelter'},
+  {c:'Content & RSS',n:'BazQux',ua:'BazQux'},
+  {c:'Content & RSS',n:'Specificfeeds',ua:'Specificfeeds'},
+  {c:'Content & RSS',n:'Twingly',ua:'Twingly'},
+  {c:'Content & RSS',n:'panscient.com',ua:'panscient.com'},
+  {c:'Content & RSS',n:'startmebot',ua:'startmebot'},
+  {c:'Content & RSS',n:'Feedpresso',ua:'Feedpresso'},
+  {c:'Content & RSS',n:'Feedwind',ua:'Feedwind'},
+  {c:'Content & RSS',n:'Wikipedia Crawler (Wikimedia)',ua:'Wikipedia'},
+  {c:'Content & RSS',n:'feeder.co',ua:'feeder.co'},
+  {c:'Content & RSS',n:'RssReaderBot',ua:'RssReaderBot'},
+  {c:'Content & RSS',n:'MonitoRSS',ua:'MonitoRSS'},
+  {c:'Content & RSS',n:'OpenRSS',ua:'OpenRSS'},
+  {c:'Content & RSS',n:'Netvibes (Dassault)',ua:'Netvibes'},
+  {c:'Content & RSS',n:'heritrix (Internet Archive)',ua:'heritrix'},
+  // Academic & Research
+  {c:'Academic & Research',n:'AlexandriaOrgBot (Internet Archive)',ua:'AlexandriaOrgBot'},
+  {c:'Academic & Research',n:'archive.org bot',ua:'archive.org_bot'},
+  {c:'Academic & Research',n:'ArchiveBot (Archive Team)',ua:'ArchiveBot'},
+  {c:'Academic & Research',n:'ArchiveTeam crawler',ua:'ArchiveTeam'},
+  {c:'Academic & Research',n:'Arquivo Web Crawler',ua:'Arquivo'},
+  {c:'Academic & Research',n:'SemanticScholarBot (Allen AI)',ua:'SemanticScholarBot'},
+  {c:'Academic & Research',n:'OpenWebSearch.eu crawler',ua:'OpenWebSearch.EU'},
+  {c:'Academic & Research',n:'InternetMeasurement',ua:'InternetMeasurement'},
+  {c:'Academic & Research',n:'VelenPublicWebCrawler',ua:'VelenPublicWebCrawler'},
+  {c:'Academic & Research',n:'CLARIN bot',ua:'CLARIN'},
+  {c:'Academic & Research',n:'uni-passau bot',ua:'uni-passau_bot'},
+  {c:'Academic & Research',n:'VU Amsterdam bot',ua:'VU Amsterdam'},
+  {c:'Academic & Research',n:'NLNZ_IAHarvester',ua:'NLNZ_IAHarvester'},
+  {c:'Academic & Research',n:'LAC_IAHarvester (Library of Congress)',ua:'LAC_IAHarvester'},
+  {c:'Academic & Research',n:'TurnitinBot',ua:'TurnitinBot'},
+  {c:'Academic & Research',n:'EasyBib crawler (Chegg)',ua:'EasyBib'},
+  {c:'Academic & Research',n:'FCCN crawler',ua:'FCCN'},
+  {c:'Academic & Research',n:'bl.uk bot (British Library)',ua:'bl.uk'},
+  {c:'Academic & Research',n:'Blackboard (Anthology)',ua:'Blackboard'},
+  {c:'Academic & Research',n:'nuzzel bot',ua:'nuzzel'},
+  {c:'Academic & Research',n:'Domains Project bot',ua:'Domains Project'},
+  // Advertising & Marketing
+  {c:'Advertising',n:'AdsBot-Google',ua:'AdsBot-Google'},
+  {c:'Advertising',n:'adidxbot (Bing Ads)',ua:'adidxbot'},
+  {c:'Advertising',n:'Criteo',ua:'Criteo'},
+  {c:'Advertising',n:'Outbrain',ua:'Outbrain'},
+  {c:'Advertising',n:'Taboola',ua:'Taboola'},
+  {c:'Advertising',n:'Quantcast',ua:'Quantcast'},
+  {c:'Advertising',n:'GumGum Bot',ua:'GumGum'},
+  {c:'Advertising',n:'Oracle AddThis',ua:'Oracle AddThis'},
+  {c:'Advertising',n:'Ezoic Crawler',ua:'Ezoic'},
+  {c:'Advertising',n:'Grapeshot (Oracle)',ua:'Grapeshot'},
+  {c:'Advertising',n:'BrandVerity',ua:'BrandVerity'},
+  {c:'Advertising',n:'SnapchatAds',ua:'SnapchatAds'},
+  {c:'Advertising',n:'IAB Tech Lab',ua:'IAB Tech Lab'},
+  {c:'Advertising',n:'Pulsepoint crawler',ua:'Pulsepoint'},
+  {c:'Advertising',n:'proximic (comScore)',ua:'proximic'},
+  {c:'Advertising',n:'CheckMarkNetwork',ua:'CheckMarkNetwork'},
+  {c:'Advertising',n:'Bing Ads',ua:'Bing Ads'},
+  {c:'Advertising',n:'awin.com crawler',ua:'awin.com'},
+  {c:'Advertising',n:'Adbeat bot',ua:'adbeat_bot'},
+  {c:'Advertising',n:'SalesViewer',ua:'SalesViewer'},
+  {c:'Advertising',n:'Salesforce',ua:'Salesforce'},
+  {c:'Advertising',n:'Slickstream (Raptive)',ua:'Slickstream'},
+  {c:'Advertising',n:'klaviyo',ua:'klaviyo'},
+  {c:'Advertising',n:'Mediavine Metadata Parser',ua:'Mediavine'},
+  {c:'Advertising',n:'TTD Content (The Trade Desk)',ua:'TTD Content'},
+  {c:'Advertising',n:'Mgid',ua:'Mgid'},
+  {c:'Advertising',n:'Smartology',ua:'Smartology'},
+  {c:'Advertising',n:'Channable Bot',ua:'Channable'},
+  // Cloud & CDN
+  {c:'Cloud & CDN',n:'Cloudflare Browser Rendering',ua:'Cloudflare-Browser-Rendering'},
+  {c:'Cloud & CDN',n:'Cloudflare Healthchecks',ua:'Cloudflare-Healthchecks'},
+  {c:'Cloud & CDN',n:'Cloudflare Radar URL Scanner',ua:'Cloudflare-Radar'},
+  {c:'Cloud & CDN',n:'Google Cloud Monitoring',ua:'GoogleCloudMonitoring'},
+  {c:'Cloud & CDN',n:'Chrome Privacy Preserving Prefetch Proxy',ua:'Chrome-Privacy'},
+  {c:'Cloud & CDN',n:'imgproxy',ua:'imgproxy'},
+  {c:'Cloud & CDN',n:'KeyCDN bot',ua:'KeyCDN'},
+  // E-commerce
+  {c:'E-commerce',n:'Amazonbot',ua:'Amazonbot'},
+  {c:'E-commerce',n:'Google-StoreBot',ua:'Google-StoreBot'},
+  {c:'E-commerce',n:'Bling ERP',ua:'Bling'},
+  {c:'E-commerce',n:'MergadoBot',ua:'MergadoBot'},
+  {c:'E-commerce',n:'ScrapeheroBot',ua:'ScrapeheroBot'},
+  {c:'E-commerce',n:'Capital One Shopping Bot',ua:'Capital One Shopping'},
+  {c:'E-commerce',n:'TinEye',ua:'TinEye'},
+  {c:'E-commerce',n:'BoardGamePrices',ua:'BoardGamePrices'},
+  {c:'E-commerce',n:'Dataprovider.com',ua:'Dataprovider.com'},
+  {c:'E-commerce',n:'PricedroneShoppingBot',ua:'PricedroneShopping'},
+  {c:'E-commerce',n:'Hlidam.to robot',ua:'Hlidam.to'},
+  // Webhooks & Integrations
+  {c:'Webhooks',n:'Zapier',ua:'Zapier'},
+  {c:'Webhooks',n:'Make (Integromat)',ua:'Integromat'},
+  {c:'Webhooks',n:'IFTTT',ua:'IFTTT'},
+  {c:'Webhooks',n:'Stripe',ua:'Stripe'},
+  {c:'Webhooks',n:'PayPal',ua:'PayPal'},
+  {c:'Webhooks',n:'Mollie',ua:'Mollie'},
+  {c:'Webhooks',n:'Shopify-Captain-Hook',ua:'Shopify'},
+  {c:'Webhooks',n:'Svix Webhooks',ua:'Svix'},
+  {c:'Webhooks',n:'Coinbase',ua:'Coinbase'},
+  {c:'Webhooks',n:'SendGrid (Twilio)',ua:'SendGrid'},
+  {c:'Webhooks',n:'Twilio Proxy',ua:'Twilio'},
+  {c:'Webhooks',n:'Zendesk Webhook',ua:'Zendesk'},
+  {c:'Webhooks',n:'GitHub / Bitbucket',ua:'Bitbucket'},
+  {c:'Webhooks',n:'Recurly',ua:'Recurly'},
+  {c:'Webhooks',n:'Omnisend',ua:'Omnisend'},
+  {c:'Webhooks',n:'Adyen',ua:'Adyen'},
+  {c:'Webhooks',n:'2Checkout',ua:'2Checkout'},
+  {c:'Webhooks',n:'Worldline',ua:'Worldline'},
+  {c:'Webhooks',n:'Worldpay',ua:'Worldpay'},
+  {c:'Webhooks',n:'Trustly',ua:'Trustly'},
+  {c:'Webhooks',n:'GoPay',ua:'GoPay'},
+  {c:'Webhooks',n:'EasyCron',ua:'EasyCron'},
+  {c:'Webhooks',n:'cron-job.org',ua:'cron-job.org'},
+  {c:'Webhooks',n:'Sparkpost (MessageBird)',ua:'Sparkpost'},
+  {c:'Webhooks',n:'Snipcart',ua:'Snipcart'},
+  {c:'Webhooks',n:'Metorik',ua:'Metorik'},
+  {c:'Webhooks',n:'WP Time Capsule',ua:'WP Time Capsule'},
+  {c:'Webhooks',n:'VaultPress (Automattic)',ua:'VaultPress'},
+  {c:'Webhooks',n:'rocket.chat bot',ua:'rocket.chat'},
+  // Accessibility
+  {c:'Accessibility',n:'Accessible Web Bot',ua:'Accessible Web Bot'},
+  {c:'Accessibility',n:'AccessStatus',ua:'AccessStatus'},
+  {c:'Accessibility',n:'Silktide',ua:'Silktide'},
+  {c:'Accessibility',n:'WOVN Crawler',ua:'WOVN'},
+  {c:'Accessibility',n:'Artemis Web Reader',ua:'Artemis'},
+  {c:'Accessibility',n:'Readable (Added Bytes)',ua:'Readable'},
+  {c:'Accessibility',n:'Noibu JS Beautifier',ua:'Noibu'},
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+var G = { mode:'live', bot:null, urlValid:false };
+
+// 45-second per-domain fetch cache
+var FETCH_CACHE = {}; // domain -> { content, time }
+var CACHE_TTL   = 45000;
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+buildDdList('');
+syncLineNums();
+
+document.getElementById('robots-ta').addEventListener('scroll', function(){
+  document.getElementById('hl-layer').style.top = (12 - this.scrollTop) + 'px';
+  document.getElementById('line-nums').scrollTop = this.scrollTop;
+});
+document.addEventListener('click', function(e){
+  if(!document.getElementById('dd-wrap').contains(e.target)) closeDd();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  URL VALIDATION
+// ═══════════════════════════════════════════════════════════
+function onUrlInput(){
+  validateUrl(false);
+  updateEditorDomainLabel();
+  syncTestBtn();
+  document.getElementById('results-section').style.display = 'none';
+}
+
+function validateUrl(showHints){
+  var val   = document.getElementById('url-input').value.trim();
+  var hint  = document.getElementById('url-hint');
+  var field = document.getElementById('url-input');
+  field.classList.remove('url-err','url-ok');
+  hint.className = 'url-hint'; hint.textContent = '';
+  G.urlValid = false;
+  if(!val) return false;
+
+  if(val.startsWith('/')){
+    if(showHints){ field.classList.add('url-err'); hint.className='url-hint err'; hint.textContent='⚠ Please enter a full URL with domain — e.g. https://example.com' + val; }
+    return false;
+  }
+  if(!val.startsWith('http://') && !val.startsWith('https://')){
+    if(showHints){ field.classList.add('url-err'); hint.className='url-hint err'; hint.textContent='⚠ Include the protocol — did you mean: https://'+val.replace(/^\/+/,'')+' ?'; }
+    return false;
+  }
+  try {
+    var u = new URL(val);
+    if(!u.hostname || u.hostname.split('.').length < 2 || u.hostname.endsWith('.')){
+      if(showHints){ field.classList.add('url-err'); hint.className='url-hint err'; hint.textContent='⚠ URL does not appear to have a valid domain.'; }
+      return false;
+    }
+    field.classList.add('url-ok'); hint.className='url-hint ok';
+    var p = u.pathname + (u.search||'');
+    hint.textContent = '✓ Domain: '+u.hostname+(p&&p!=='/'?' · Testing path: '+p:' · Testing root /');
+    G.urlValid = true;
+    updateHeaderChips();
+    return true;
+  } catch(e){
+    if(showHints){ field.classList.add('url-err'); hint.className='url-hint err'; hint.textContent='⚠ Could not parse this URL. Try: https://yourdomain.com/path'; }
+    return false;
+  }
+}
+
+function updateEditorDomainLabel(){
+  var urlVal = document.getElementById('url-input').value.trim();
+  var lbl = document.getElementById('ed-domain-label');
+  try { var u = new URL(urlVal); lbl.textContent = '— ' + u.hostname; }
+  catch(e) { lbl.textContent = ''; }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DROPDOWN — with custom bot option when no results found
+// ═══════════════════════════════════════════════════════════
+function buildDdList(q){
+  var list = document.getElementById('dd-list');
+  q = (q||'').trim();
+  var ql = q.toLowerCase();
+  var cats = {}, any = false;
+
+  BOTS.forEach(function(b){
+    if(ql && b.n.toLowerCase().indexOf(ql)===-1 && b.ua.toLowerCase().indexOf(ql)===-1 && b.c.toLowerCase().indexOf(ql)===-1) return;
+    if(!cats[b.c]) cats[b.c] = [];
+    cats[b.c].push(b); any = true;
+  });
+
+  var html = '';
+  if(any){
+    Object.keys(cats).forEach(function(cat){
+      html += '<div class="dd-cat">'+esc(cat)+'</div>';
+      cats[cat].forEach(function(b){
+        var sel = G.bot && G.bot.ua === b.ua ? ' sel' : '';
+        html += '<div class="dd-opt'+sel+'" onclick="pickBot(\''+b.ua.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">'
+              + '<span>'+esc(b.n)+'</span>'
+              + '<span class="dd-opt-ua">'+esc(b.ua)+'</span>'
+              + '</div>';
+      });
+    });
+  } else {
+    html += '<div class="dd-no-res">No bots matched.</div>';
+  }
+
+  // Custom bot option: show when user has typed something (up to 60 chars)
+  if(q.length > 0 && q.length <= 60){
+    html += '<div class="dd-custom-opt" onclick="pickCustomBot()">'
+          + '<span class="dd-custom-icon">+ Custom</span>'
+          + '<span>Continue with &ldquo;'+esc(q.substring(0,60))+'&rdquo;</span>'
+          + '</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function filterDd(){ buildDdList(document.getElementById('dd-search').value); }
+
+function toggleDd(){
+  var panel = document.getElementById('dd-panel'), btn = document.getElementById('dd-btn');
+  if(panel.classList.contains('open')){ closeDd(); return; }
+  btn.classList.add('open'); panel.classList.add('open');
+  var s = document.getElementById('dd-search'); s.value = ''; buildDdList('');
+  setTimeout(function(){ s.focus(); }, 40);
+}
+function closeDd(){
+  document.getElementById('dd-panel').classList.remove('open');
+  document.getElementById('dd-btn').classList.remove('open');
+}
+function pickBot(ua){
+  var b = BOTS.find(function(x){ return x.ua === ua; });
+  if(!b) return;
+  G.bot = b;
+  var disp = document.getElementById('dd-display');
+  disp.textContent = b.n; disp.classList.remove('dd-placeholder');
+  closeDd(); buildDdList('');
+  updateHeaderChips(); syncTestBtn();
+}
+function pickCustomBot(){
+  var q = document.getElementById('dd-search').value.trim().substring(0, 60);
+  if(!q) return;
+  G.bot = { c: 'Custom', n: q, ua: q };
+  var disp = document.getElementById('dd-display');
+  disp.textContent = q; disp.classList.remove('dd-placeholder');
+  closeDd(); buildDdList('');
+  updateHeaderChips(); syncTestBtn();
+  toast('Custom bot "'+q+'" will be matched against User-agent: '+q);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODE
+// ═══════════════════════════════════════════════════════════
+function setMode(m){
+  G.mode = m;
+  document.getElementById('lbl-live').classList.toggle('sel', m==='live');
+  document.getElementById('lbl-manual').classList.toggle('sel', m==='manual');
+  if(m === 'manual'){
+    document.getElementById('editor-section').style.display = 'block';
+    clearFetchMsg();
+    updateEditorDomainLabel();
+  }
+  updateHeaderChips(); syncTestBtn();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EDITOR
+// ═══════════════════════════════════════════════════════════
+function syncLineNums(){
+  var ta = document.getElementById('robots-ta');
+  var lines = ta.value ? ta.value.split('\n') : [''];
+  document.getElementById('line-nums').innerHTML =
+    lines.map(function(_,i){ return '<span class="ln-item">'+(i+1)+'</span>'; }).join('');
+  var rules = (ta.value.match(/^(disallow|allow)\s*:/gim)||[]).length;
+  document.getElementById('ed-info').textContent =
+    ta.value.trim() ? lines.length+' lines · '+rules+' rule'+(rules!==1?'s':'') : 'Paste or fetch robots.txt content below';
+}
+function onEditorInput(){
+  syncLineNums(); syncTestBtn();
+  document.getElementById('results-section').style.display = 'none';
+  clearHlLayer(); document.getElementById('ed-legend').style.display = 'none';
+}
+function clearEditor(){
+  document.getElementById('robots-ta').value = '';
+  clearHlLayer(); syncLineNums(); syncTestBtn();
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('ed-legend').style.display = 'none';
+}
+function copyEditor(){
+  var v = document.getElementById('robots-ta').value;
+  if(!v){ toast('Nothing to copy.'); return; }
+  navigator.clipboard.writeText(v)
+    .then(function(){ toast('Copied to clipboard!'); })
+    .catch(function(){ document.getElementById('robots-ta').select(); document.execCommand('copy'); toast('Copied!'); });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HIGHLIGHT LAYER
+// ═══════════════════════════════════════════════════════════
+function rebuildHlLayer(hlMap, totalLines){
+  var html = '';
+  for(var i = 0; i < totalLines; i++){
+    var t = hlMap[i];
+    html += t ? '<div class="hl-line hl-'+t+'"></div>' : '<div class="hl-line"></div>';
+  }
+  var layer = document.getElementById('hl-layer');
+  layer.innerHTML = html;
+  layer.style.top = (12 - document.getElementById('robots-ta').scrollTop) + 'px';
+}
+function clearHlLayer(){
+  var l = document.getElementById('hl-layer'); l.innerHTML = ''; l.style.top = '12px';
+}
+function scrollEditorToFirstHl(){
+  var ta = document.getElementById('robots-ta');
+  var layer = document.getElementById('hl-layer');
+  var first = layer.querySelector('.hl-block,.hl-allow');
+  if(!first) return;
+  var idx = Array.prototype.indexOf.call(layer.children, first);
+  if(idx < 0) return;
+  var target = 12 + idx * 20 - (ta.clientHeight / 2) + 10;
+  ta.scrollTo({ top: Math.max(0, target), behavior:'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TEST BUTTON SYNC
+// ═══════════════════════════════════════════════════════════
+function syncTestBtn(){
+  var ok = G.urlValid && !!G.bot &&
+           (G.mode === 'live' || document.getElementById('robots-ta').value.trim().length > 0);
+  document.getElementById('test-btn').disabled = !ok;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FETCH MESSAGE HELPERS
+// ═══════════════════════════════════════════════════════════
+function setFetchMsg(type, html){
+  var area = document.getElementById('fetch-msg-area');
+  if(!type){ area.innerHTML = ''; return; }
+  var icons = { info:'<div class="spin"></div>', ok:'✅', warn:'⚠️', err:'❌', cache:'⚡' };
+  var cls   = { info:'fm-info', ok:'fm-ok', warn:'fm-warn', err:'fm-err', cache:'fm-cache' };
+  area.innerHTML = '<div class="fetch-msg '+cls[type]+'"><span class="fm-icon">'+icons[type]+'</span><span>'+html+'</span></div>';
+}
+function clearFetchMsg(){ document.getElementById('fetch-msg-area').innerHTML = ''; }
+
+// ═══════════════════════════════════════════════════════════
+//  RUN TEST
+// ═══════════════════════════════════════════════════════════
+async function runTest(){
+  if(!validateUrl(true)) return;
+  if(!G.bot){ toast('Please select a crawler / user agent.'); return; }
+
+  var urlVal = document.getElementById('url-input').value.trim();
+  var u = new URL(urlVal);
+  var origin  = u.origin;
+  var testPth = (u.pathname||'/') + (u.search||'');
+  if(!testPth) testPth = '/';
+
+  document.getElementById('results-section').style.display = 'none';
+
+  if(G.mode === 'live'){
+    await doLiveFetch(origin, testPth);
+  } else {
+    var content = document.getElementById('robots-ta').value.trim();
+    if(!content){ setFetchMsg('warn','Please add robots.txt content to validate before running the test.'); return; }
+    analyseAndShow(content, testPth);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LIVE FETCH — 45s per-domain cache, 3 proxy fallbacks
+// ═══════════════════════════════════════════════════════════
+async function doLiveFetch(origin, testPth){
+  var robotsUrl = origin + '/robots.txt';
+  var domain    = (new URL(origin)).hostname;
+
+  document.getElementById('editor-section').style.display = 'block';
+  clearHlLayer();
+  updateEditorDomainLabel();
+
+  // ── Check the 45-second domain cache first ──
+  var cached = FETCH_CACHE[domain];
+  if(cached && (Date.now() - cached.time) < CACHE_TTL){
+    var remaining = Math.ceil((CACHE_TTL - (Date.now() - cached.time)) / 1000);
+    document.getElementById('robots-ta').value = cached.content;
+    syncLineNums();
+    setFetchMsg('cache',
+      'Using cached robots.txt for <code>'+esc(domain)+'</code> '
+      +'(fetched '+Math.round((Date.now()-cached.time)/1000)+'s ago — refreshes in '+remaining+'s). '
+      +'Switch to <strong>Manual</strong> or wait '+remaining+'s for a new fetch.');
+    analyseAndShow(cached.content, testPth);
+    return;
+  }
+
+  // ── New fetch needed ──
+  document.getElementById('robots-ta').value = '';
+  syncLineNums();
+  setFetchMsg('info', 'Fetching <code>'+esc(robotsUrl)+'</code>…');
+  setBtnLoading(true);
+
+  var content = null, fetchErr = null;
+
+  // Proxy 1 — allorigins /get (JSON, exposes real HTTP status)
+  if(!content && !fetchErr){
+    try {
+      var r1 = await fetchT('https://api.allorigins.win/get?url='+encodeURIComponent(robotsUrl), 9000);
+      if(r1.ok){
+        var j = await r1.json();
+        var code = j.status && j.status.http_code;
+        if(code === 404 || code === 0){ fetchErr = {type:'404'}; }
+        else if(j.contents){
+          var tr1 = j.contents.trim().toLowerCase();
+          if(tr1.startsWith('<!doctype') || tr1.startsWith('<html')){ fetchErr = {type:'404'}; }
+          else { content = j.contents; }
+        }
+      }
+    } catch(e){}
+  }
+
+  // Proxy 2 — corsproxy.io (raw)
+  if(!content && !fetchErr){
+    try {
+      var r2 = await fetchT('https://corsproxy.io/?url='+encodeURIComponent(robotsUrl), 9000);
+      if(r2.ok){
+        var t2 = await r2.text(); var tr2 = t2.trim().toLowerCase();
+        if(tr2.startsWith('<!doctype') || tr2.startsWith('<html')){ fetchErr = {type:'404'}; }
+        else if(t2.trim()){ content = t2; }
+      } else if(r2.status === 404){ fetchErr = {type:'404'}; }
+      else { fetchErr = {type:'http', status:r2.status}; }
+    } catch(e){}
+  }
+
+  // Proxy 3 — codetabs (raw)
+  if(!content && !fetchErr){
+    try {
+      var r3 = await fetchT('https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(robotsUrl), 9000);
+      if(r3.ok){
+        var t3 = await r3.text(); var tr3 = t3.trim().toLowerCase();
+        if(tr3.startsWith('<!doctype') || tr3.startsWith('<html')){ fetchErr = {type:'404'}; }
+        else if(t3.trim()){ content = t3; }
+        else { fetchErr = {type:'404'}; }
+      } else if(r3.status === 404){ fetchErr = {type:'404'}; }
+      else { fetchErr = {type:'http', status:r3.status}; }
+    } catch(e){ fetchErr = {type:'network'}; }
+  }
+
+  setBtnLoading(false);
+
+  if(content !== null){
+    // Store in 45-second cache
+    FETCH_CACHE[domain] = { content: content, time: Date.now() };
+    document.getElementById('robots-ta').value = content;
+    syncLineNums();
+    setFetchMsg('ok', 'Successfully fetched <code>'+esc(robotsUrl)+'</code> · Cached for 45s');
+    analyseAndShow(content, testPth);
+  } else {
+    handleFetchError(fetchErr || {type:'network'}, robotsUrl);
+  }
+}
+
+function fetchT(url, ms){
+  var ctrl = new AbortController();
+  var t = setTimeout(function(){ ctrl.abort(); }, ms);
+  return fetch(url, {signal: ctrl.signal}).finally(function(){ clearTimeout(t); });
+}
+
+function handleFetchError(err, robotsUrl){
+  if(err.type === '404'){
+    setFetchMsg('warn',
+      'No <code>robots.txt</code> found at <code>'+esc(robotsUrl)+'</code>. '
+      +'Make sure a valid file exists at the root of your domain. '
+      +'Without one, all crawlers are permitted by default.');
+    document.getElementById('robots-ta').value =
+      '# No robots.txt found at '+robotsUrl+
+      '\n# Without a robots.txt file, all crawlers are permitted by default.';
+    syncLineNums();
+    showResult({ allowed:true, verdict:'Allowed (No robots.txt)',
+      reason:'No robots.txt was found. All URLs are accessible to all crawlers when no file is present.',
+      matchedRule:null, hlMap:{},
+      totalLines: document.getElementById('robots-ta').value.split('\n').length });
+  } else if(err.type === 'http'){
+    setFetchMsg('err', 'HTTP '+err.status+' received fetching <code>'+esc(robotsUrl)+'</code>. '
+      +'Switch to <strong>Manual</strong> mode and paste your robots.txt to continue.');
+  } else {
+    setFetchMsg('err',
+      'Could not reach <code>'+esc(robotsUrl)+'</code> via any fetch proxy. '
+      +'This is usually a CORS or network restriction. '
+      +'Switch to <strong>Manual</strong> mode, paste your robots.txt content, and run the test.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ROBOTS.TXT PARSER
+//
+//  KEY FIX: According to the robots.txt spec, only truly blank
+//  lines (no content, not even a comment) separate User-agent
+//  groups. A comment-only line like "# Directories" must NOT
+//  end the current group — it should simply be ignored.
+//
+//  The old code used:
+//    var stripped = raw.split('#')[0].trim();
+//    if(!stripped) { end group; continue; }
+//  This wrongly ended a group when it hit a comment line like
+//  "# Directories", because after stripping the comment the
+//  line became empty.
+//
+//  The fix: check the RAW line first. If it is truly blank
+//  (all whitespace) then end the group. If it has a '#' but
+//  no directives, skip it silently without ending the group.
+// ═══════════════════════════════════════════════════════════
+function parseRobots(content){
+  var lines = content.split('\n');
+  var groups = [], cur = null, hadRule = false;
+
+  for(var i = 0; i < lines.length; i++){
+    var raw     = lines[i];
+    var rawTrim = raw.trim();
+
+    // A truly blank line (after trimming) ends the current group.
+    // Comment-only lines do NOT end a group.
+    if(rawTrim === ''){
+      if(cur && hadRule){ cur = null; hadRule = false; }
+      continue;
+    }
+
+    // Strip inline comments to get the directive content
+    var stripped = rawTrim.split('#')[0].trim();
+
+    // Comment-only line (stripped is empty but rawTrim is not) — skip silently
+    if(!stripped) continue;
+
+    var ci = stripped.indexOf(':');
+    if(ci === -1) continue;
+    var dir = stripped.substring(0, ci).trim().toLowerCase();
+    var val = stripped.substring(ci + 1).trim();
+
+    if(dir === 'user-agent'){
+      if(!cur || hadRule){ cur = {agents:[], rules:[], lineNums:[]}; groups.push(cur); hadRule = false; }
+      cur.agents.push(val.toLowerCase());
+      cur.lineNums.push(i);
+    } else if((dir === 'disallow' || dir === 'allow') && cur){
+      cur.rules.push({ type:dir, path:val, ln:i });
+      hadRule = true;
+    }
+  }
+  return groups;
+}
+
+function findGroup(groups, ua){
+  var ual = ua.toLowerCase(), specific = null, wildcard = null;
+  groups.forEach(function(g){
+    g.agents.forEach(function(a){
+      if(a === '*') wildcard = g;
+      else if(ual.indexOf(a) !== -1 || a.indexOf(ual) !== -1) specific = g;
+    });
+  });
+  return specific || wildcard;
+}
+
+function testPath(group, path){
+  if(!group) return { allowed:true, rule:null, reason:'No matching User-agent directive — allowed by default.' };
+  var best = null, bestLen = -1, bestAllow = false;
+
+  group.rules.forEach(function(rule){
+    // Empty Disallow: explicitly permits everything — treat as "allow all"
+    if(rule.type === 'disallow' && rule.path === ''){
+      if(bestLen < 0){ best = rule; bestLen = 0; bestAllow = true; } return;
+    }
+    if(rule.type === 'allow' && rule.path === '') return;
+
+    if(matchPath(rule.path, path)){
+      // Specificity = length of literal chars (excluding wildcards)
+      var len = rule.path.replace(/[*$]/g,'').length;
+      var isAllow = rule.type === 'allow';
+      // Allow beats Disallow of equal specificity (Google's tie-break rule)
+      if(len > bestLen || (len === bestLen && isAllow && !bestAllow)){
+        bestLen = len; best = rule; bestAllow = isAllow;
+      }
+    }
+  });
+
+  if(!best || (best.type === 'disallow' && best.path === ''))
+    return { allowed:true, rule:null, reason:'No applicable rule found — URL is permitted by default.' };
+
+  return {
+    allowed: best.type === 'allow', rule: best,
+    reason: best.type === 'disallow'
+      ? 'Blocked by Disallow: ' + (best.path || '(empty)')
+      : 'Explicitly allowed by Allow: ' + best.path
+  };
+}
+
+function matchPath(rulePath, urlPath){
+  var p = rulePath.replace(/([.+?^{}()|[\]\\])/g,'\\$1').replace(/\*/g,'.*');
+  var anchored = p.endsWith('$');
+  if(anchored) p = p.slice(0,-1) + '$';
+  try { return new RegExp('^'+p).test(urlPath); }
+  catch(e) { return urlPath.startsWith(rulePath.replace(/[*$]/g,'')); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ANALYSE & SHOW
+// ═══════════════════════════════════════════════════════════
+function analyseAndShow(content, testPth){
+  var groups = parseRobots(content);
+  var group  = findGroup(groups, G.bot.ua);
+  var result = testPath(group, testPth);
+  var lines  = content.split('\n');
+  var hlMap  = {};
+
+  if(group){
+    group.lineNums.forEach(function(ln){ hlMap[ln] = 'ua'; });
+    if(result.rule) hlMap[result.rule.ln] = result.allowed ? 'allow' : 'block';
+  }
+
+  rebuildHlLayer(hlMap, lines.length);
+  document.getElementById('ed-legend').style.display = 'flex';
+  setTimeout(scrollEditorToFirstHl, 120);
+
+  showResult({
+    allowed:     result.allowed,
+    verdict:     result.allowed ? 'Eligible for Crawling & Indexing' : 'Blocked from Crawling',
+    reason:      result.reason,
+    matchedRule: result.rule,
+    hlMap:       hlMap,
+    totalLines:  lines.length
+  });
+}
+
+function showResult(r){
+  var sec = document.getElementById('results-section');
+  sec.style.display = 'block';
+  var urlVal = document.getElementById('url-input').value.trim();
+  var u; try{ u = new URL(urlVal); }catch(e){ u = null; }
+  var pathDisp = u ? (u.pathname + (u.search||'')) : '/';
+  var botName  = G.bot ? G.bot.n : '';
+
+  document.getElementById('result-hero-box').innerHTML =
+    '<div class="result-hero '+(r.allowed?'rh-allowed':'rh-blocked')+'" style="margin-bottom:12px">'
+    +'<div class="rh-icon">'+(r.allowed?'✅':'🚫')+'</div>'
+    +'<div class="rh-body">'
+    +'<div class="rh-verdict" style="color:var('+(r.allowed?'--green':'--red')+')">'
+    +(r.allowed?'✓ ':'✕ ')+esc(r.verdict)+'</div>'
+    +'<div class="rh-desc"><span class="rh-path">'+esc(pathDisp)+'</span> is '
+    +(r.allowed?'accessible to':'blocked for')
+    +' <strong>'+esc(botName)+'</strong>.<br>'+esc(r.reason)+'</div>'
+    +'</div></div>';
+
+  var rHtml = '<div><div class="rules-hdr">🎯 Matched Rule</div>';
+  if(r.matchedRule){
+    var isBlock = r.matchedRule.type === 'disallow';
+    rHtml += '<div class="rule-row '+(isBlock?'rr-block':'rr-allow')+'">'
+      +'<span class="rtag '+(isBlock?'rtag-d':'rtag-a')+'">'+(isBlock?'Disallow':'Allow')+'</span>'
+      +'<span class="rule-path-val">'+esc(r.matchedRule.path || '(empty)')+'</span>'
+      +'<span class="rule-line">Line '+(r.matchedRule.ln+1)+' · highlighted above</span>'
+      +'</div>';
+  } else {
+    rHtml += '<div class="rule-row rr-none"><span class="rtag rtag-n">None</span>'
+      +'<span>No specific rule matched — URL is permitted by default when no Disallow applies.</span>'
+      +'</div>';
+  }
+  rHtml += '</div>';
+  document.getElementById('rule-box').innerHTML = rHtml;
+  sec.scrollIntoView({ behavior:'smooth', block:'start' });
+  updateHeaderChips();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HEADER CHIPS
+// ═══════════════════════════════════════════════════════════
+function updateHeaderChips(){
+  var urlVal = document.getElementById('url-input').value.trim();
+  var dc = document.getElementById('chip-domain'), bc = document.getElementById('chip-bot'), mc = document.getElementById('chip-mode');
+  if(G.urlValid && urlVal){ try{ var u = new URL(urlVal); dc.textContent='🌐 '+u.hostname; dc.style.display='inline-flex'; }catch(e){ dc.style.display='none'; }}
+  else dc.style.display = 'none';
+  if(G.bot){ bc.textContent='🤖 '+G.bot.n; bc.style.display='inline-flex'; } else bc.style.display='none';
+  mc.textContent = G.mode === 'live' ? '🌐 Live' : '✏️ Manual';
+  mc.style.display = 'inline-flex';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
+function setBtnLoading(on){
+  var btn=document.getElementById('test-btn'), icon=document.getElementById('tbtn-icon'), txt=document.getElementById('tbtn-txt');
+  if(on){ btn.disabled=true; icon.innerHTML='<div style="width:13px;height:13px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></div>'; txt.textContent='Fetching…'; }
+  else { btn.disabled=false; icon.textContent='▶'; txt.textContent='Test URL'; }
+}
+
+function resetAll(){
+  G = {mode:'live', bot:null, urlValid:false};
+  document.getElementById('url-input').value='';
+  document.getElementById('url-input').className='url-field';
+  document.getElementById('url-hint').textContent=''; document.getElementById('url-hint').className='url-hint';
+  document.getElementById('dd-display').textContent='Select crawler…';
+  document.getElementById('dd-display').classList.add('dd-placeholder');
+  document.getElementById('lbl-live').classList.add('sel');
+  document.getElementById('lbl-manual').classList.remove('sel');
+  document.getElementById('editor-section').style.display='none';
+  document.getElementById('results-section').style.display='none';
+  document.getElementById('robots-ta').value='';
+  document.getElementById('ed-domain-label').textContent='';
+  document.getElementById('ed-legend').style.display='none';
+  clearFetchMsg(); clearHlLayer(); syncLineNums();
+  ['chip-domain','chip-bot','chip-mode'].forEach(function(id){ document.getElementById(id).style.display='none'; });
+  buildDdList(''); syncTestBtn();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+var _tt;
+function toast(msg){
+  var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(function(){ el.classList.remove('show'); }, 2800);
+}
+
+setInterval(syncTestBtn, 250);
+</script>
+</body>
+</html>
